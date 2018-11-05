@@ -74,18 +74,14 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
                 User user=dataSnapshot.getValue(User.class);
                 user.setUid(dataSnapshot.getKey());
 
-//                int position = mDataList.indexOf(user);
                 mDataList.remove(user);
                 mUserAdapter.notifyDataSetChanged();
-
-//                mUserAdapter.updateDataSet(user);
 
             }
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,8 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.saifi369.myfirebaseapp.DetailsActivity;
-import com.saifi369.myfirebaseapp.MainActivity;
 import com.saifi369.myfirebaseapp.R;
-import com.saifi369.myfirebaseapp.network.NetworkUtils;
+import com.saifi369.myfirebaseapp.network.Utils;
 
 import java.util.List;
 
@@ -58,21 +56,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
         holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                //this line returns true
-//                boolean remove = mDataList.contains(user);
-                //if I try to remove the user here, its removed
-                //this line works as I want
-//                mDataList.remove(user);
-//                Log.d(MainActivity.TAG, "updateDataSet: Contains: "+remove);
 
-                Task<Void> removeUser = NetworkUtils.removeUser(user.getUid());
+                String userID=user.getUid();
 
-                removeUser.addOnSuccessListener(new OnSuccessListener<Void>() {
+                Task<Void> voidTask = Utils.removeUser(userID);
+
+                voidTask.addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(mContext, "User removed", Toast.LENGTH_SHORT).show();
-                        //mDataList.remove(user);
-                        //notifyDataSetChanged();
+                        Toast.makeText(mContext, "User removed from database...", Toast.LENGTH_SHORT).show();
+
                     }
                 });
 
@@ -81,14 +74,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
         });
 
     }
-
-//    public void updateDataSet(User user){
-//        //this also returns false even the data of this user id displayed
-//        boolean contains=mDataList.contains(user);
-//        //this also does not works
-//        mDataList.remove(user);
-//        this.notifyDataSetChanged();
-//    }
 
     @Override
     public int getItemCount() {
