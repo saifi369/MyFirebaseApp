@@ -41,36 +41,29 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
 
         User user=mDataList.get(position);
 
-        holder.textView.setText(user.getName()+ "  |  "+user.getAge());
+        holder.tvName.setText(user.getName());
+        holder.tvAge.setText(String.valueOf(user.getAge()));
+        holder.tvProfession.setText(user.getProfession());
+        holder.tvCountry.setText(user.getCity());
 
-        holder.textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String uid=user.getUid();
-                Intent intent=new Intent(mContext,DetailsActivity.class);
-                intent.putExtra(USER_KEY,uid);
-                mContext.startActivity(intent);
-            }
+
+        holder.parentView.setOnClickListener(v -> {
+            String uid=user.getUid();
+            Intent intent=new Intent(mContext,DetailsActivity.class);
+            intent.putExtra(USER_KEY,uid);
+            mContext.startActivity(intent);
         });
 
-        holder.textView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+        holder.parentView.setOnLongClickListener(v -> {
 
-                String userID=user.getUid();
+            String userID=user.getUid();
 
-                Task<Void> voidTask = Utils.removeUser(userID);
+            Task<Void> voidTask = Utils.removeUser(userID);
 
-                voidTask.addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(mContext, "User removed from database...", Toast.LENGTH_SHORT).show();
+            voidTask.addOnSuccessListener(aVoid -> Toast.makeText(mContext, "User removed from database...", Toast.LENGTH_SHORT).show());
+            voidTask.addOnFailureListener(aVoid-> Toast.makeText(mContext, "User not removed..", Toast.LENGTH_SHORT).show());
 
-                    }
-                });
-
-                return true;
-            }
+            return true;
         });
 
     }
@@ -82,11 +75,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> 
 
     class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView textView;
+        TextView tvName;
+        TextView tvAge;
+        TextView tvProfession;
+        TextView tvCountry;
+        View parentView;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            textView=itemView.findViewById(R.id.textView);
+            parentView=itemView;
+            tvName=itemView.findViewById(R.id.tv_name);
+            tvAge=itemView.findViewById(R.id.tv_age);
+            tvCountry=itemView.findViewById(R.id.tv_country);
+            tvProfession=itemView.findViewById(R.id.tv_profession);
         }
     }
 }

@@ -5,19 +5,34 @@ public class User {
     private String uid;
     private String name;
     private int age;
+    private String city;
+    private String profession;
 
     public User() {
     }
 
-    public User(String uid, String name, int age) {
+    public User(String uid, String name, int age, String city, String profession) {
         this.uid = uid;
         this.name = name;
         this.age = age;
+        this.city = city;
+        this.profession = profession;
     }
 
-    public User(String name, int age) {
-        this.name = name;
-        this.age = age;
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getProfession() {
+        return profession;
+    }
+
+    public void setProfession(String profession) {
+        this.profession = profession;
     }
 
     public String getUid() {

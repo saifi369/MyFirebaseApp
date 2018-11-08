@@ -20,6 +20,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.saifi369.myfirebaseapp.model.User;
 import com.saifi369.myfirebaseapp.model.UserAdapter;
 
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mRef;
     private ChildEventListener mChildListener;
     private List<User> mDataList;
-
+    private ValueEventListener mQueryListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,36 +59,56 @@ public class MainActivity extends AppCompatActivity {
         mUserAdapter=new UserAdapter(this,mDataList);
         mRecyclerView.setAdapter(mUserAdapter);
 
-        mChildListener=new ChildEventListener() {
+//        mChildListener=new ChildEventListener() {
+//            @Override
+//            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//                User user=dataSnapshot.getValue(User.class);
+////                user.setUid(dataSnapshot.getKey());
+//
+//                mDataList.add(user);
+//                mUserAdapter.notifyDataSetChanged();
+//
+//            }
+//
+//            @Override
+//            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+//
+////                User user=dataSnapshot.getValue(User.class);
+////                user.setUid(dataSnapshot.getKey());
+////
+////                mDataList.remove(user);
+////                mUserAdapter.notifyDataSetChanged();
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        };
+//
+//        mRef.addChildEventListener(mChildListener);
+
+        mQueryListener=new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                User user=dataSnapshot.getValue(User.class);
-                user.setUid(dataSnapshot.getKey());
-
-                mDataList.add(user);
+                for (DataSnapshot snapshot:dataSnapshot.getChildren()){
+                    User user=snapshot.getValue(User.class);
+                    mDataList.add(user);
+                }
                 mUserAdapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                User user=dataSnapshot.getValue(User.class);
-                user.setUid(dataSnapshot.getKey());
-
-                mDataList.remove(user);
-                mUserAdapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
             }
 
@@ -96,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mRef.addChildEventListener(mChildListener);
     }
 
     @Override
@@ -108,22 +129,37 @@ public class MainActivity extends AppCompatActivity {
     private void readData(View view) {
         //read data here
 
+
     }
 
 
     private void runCode(View view) {
         //insert data here
 
-        String name = mInputText.getText().toString();
-        int age = Integer.parseInt(mInputNum.getText().toString());
+        //1. select * from tablename
 
-        User user=new User(name,age);
+//        mRef.addValueEventListener(mQueryListener);
 
-        String key=mRef.push().getKey();
-        mRef.child(key).setValue(user);
+        //2. select * from table name where name = "Ali"
 
-        Toast.makeText(this, "Data inserted...", Toast.LENGTH_SHORT).show();
-        
+//        Query query1=mRef.orderByChild("name").equalTo("Ali");
+//        query1.addValueEventListener(mQueryListener);
+
+        //3. select * from table name order by name
+//        Query query1=mRef.orderByChild("name");
+//        query1.addValueEventListener(mQueryListener);
+        //4. select * from table name where age > 30
+//        Query query1=mRef.orderByChild("age").startAt(30);
+//        query1.addValueEventListener(mQueryListener);
+
+        //5. select * from table name where age<30
+//        Query query1=mRef.orderByChild("age").endAt(30);
+//        query1.addValueEventListener(mQueryListener);
+
+        //6. select * from table name limit by 3
+//        mRef.limitToLast(3).addValueEventListener(mQueryListener);
+        //select * from table name="ALi"
+
     }
 
 
