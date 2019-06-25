@@ -9,23 +9,29 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -37,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mInputText, mInputNum;
     private TextView mOutputText, mProgressText;
     private RecyclerView mRecyclerView;
+    private ImageView mImageView;
     private ProgressBar mProgressBar;
     private boolean mGranted;
     private StorageReference mRef;
@@ -53,23 +60,61 @@ public class MainActivity extends AppCompatActivity {
 
         mRef = FirebaseStorage.getInstance().getReference("docs/");
 
+        getPermissions();
+
+    }
+
+    private void getPermissions() {
+
+        String externalReadPermission = Manifest.permission.READ_EXTERNAL_STORAGE.toString();
+        String externalWritePermission = Manifest.permission.WRITE_EXTERNAL_STORAGE.toString();
+
+        if (ContextCompat.checkSelfPermission(this, externalReadPermission) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, externalWritePermission) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{externalReadPermission, externalWritePermission}, STORAGE_PERMISSION_CODE);
+            }
+        }
+
     }
 
     private void readData(View view) {
+
+        File outputFile = new File(Environment.getExternalStorageDirectory(), "file.pdf");
+
+        long ONE_MEGABYTE = 1024 * 1024;
+
+        mRef.child("images/android services.pdf").getBytes(ONE_MEGABYTE)
+                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+
+//                        mImageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
+                        Toast.makeText(MainActivity.this, "File Downloaded", Toast.LENGTH_SHORT).show();
+
+                        try {
+                            FileOutputStream fos = new FileOutputStream(outputFile);
+                            fos.write(bytes);
+                            fos.close();
+                            Log.d(TAG, "onSuccess: File saved on device: " + outputFile);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Download error", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "onFailure: Error: " + e.getMessage());
+                    }
+                });
 
 
     }
 
     private void runCode(View view) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!mGranted) {
-                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
-                    return;
-                }
-            }
-        }
 
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -110,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.user_recyclerview);
         mProgressBar = findViewById(R.id.progress_bar);
         mProgressText = findViewById(R.id.tv_progress);
+        mImageView = findViewById(R.id.image_view);
     }
 
     @Override
@@ -137,6 +183,9 @@ public class MainActivity extends AppCompatActivity {
             StorageReference storageReference = mRef.child("images/" + imageUri.getLastPathSegment());
 
             UploadTask uploadTask = storageReference.putFile(imageUri);
+            File file = new File(imageUri.toString());
+            String fileName = file.getName();
+            Log.d(TAG, "onActivityResult: filename: " + fileName);
             mProgressBar.setVisibility(View.VISIBLE);
             mProgressBar.setIndeterminate(false);
 
@@ -163,4 +212,5 @@ public class MainActivity extends AppCompatActivity {
                     });
         }
     }
+
 }
