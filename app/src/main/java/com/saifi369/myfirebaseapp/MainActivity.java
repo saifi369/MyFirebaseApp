@@ -25,13 +25,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -80,26 +80,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void readData(View view) {
 
-        File outputFile = new File(Environment.getExternalStorageDirectory(), "file.pdf");
+        File outputFile = new File(Environment.getExternalStorageDirectory(), "mynewimage.jpeg");
 
         long ONE_MEGABYTE = 1024 * 1024;
 
-        mRef.child("images/android services.pdf").getBytes(ONE_MEGABYTE)
-                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+        mRef.child("images/90").getFile(outputFile)
+                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                     @Override
-                    public void onSuccess(byte[] bytes) {
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
 
-//                        mImageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length));
                         Toast.makeText(MainActivity.this, "File Downloaded", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "onSuccess: File Downloaded: " + outputFile);
 
-                        try {
-                            FileOutputStream fos = new FileOutputStream(outputFile);
-                            fos.write(bytes);
-                            fos.close();
-                            Log.d(TAG, "onSuccess: File saved on device: " + outputFile);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        mImageView.setImageURI(Uri.fromFile(outputFile));
 
                     }
                 })
