@@ -1,6 +1,7 @@
 package com.saifi369.myfirebaseapp;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,7 +26,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -80,30 +80,41 @@ public class MainActivity extends AppCompatActivity {
 
     private void readData(View view) {
 
-        File outputFile = new File(Environment.getExternalStorageDirectory(), "mynewimage.jpeg");
-
-        long ONE_MEGABYTE = 1024 * 1024;
-
-        mRef.child("images/90").getFile(outputFile)
-                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+        mRef.child("images/91").getDownloadUrl()
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    public void onSuccess(Uri uri) {
 
-                        Toast.makeText(MainActivity.this, "File Downloaded", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "onSuccess: File Downloaded: " + outputFile);
+                        Log.d(TAG, "onSuccess: download url: " + uri.toString());
+                        Toast.makeText(MainActivity.this, "URL received", Toast.LENGTH_SHORT).show();
 
-                        mImageView.setImageURI(Uri.fromFile(outputFile));
+                        downloadFile(uri);
 
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(MainActivity.this, "Download error", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "onFailure: Error: " + e.getMessage());
+                        Toast.makeText(MainActivity.this, "Some error occured", Toast.LENGTH_SHORT).show();
                     }
                 });
 
+    }
+
+    private void downloadFile(Uri uri) {
+
+        File file = new File(Environment.getExternalStorageDirectory(), "mypdffile.pdf");
+
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+        DownloadManager.Request request = new DownloadManager.Request(uri)
+                .setTitle("File Download")
+                .setDescription("This is file download demo")
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                .setDestinationUri(Uri.fromFile(file));
+
+        downloadManager.enqueue(request);
 
     }
 
